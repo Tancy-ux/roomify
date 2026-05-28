@@ -2,6 +2,8 @@ import type {Route} from "./+types/home";
 import Navbar from "../../components/Navbar";
 import {ArrowRight, ArrowUpRight, Clock, Layers} from "lucide-react";
 import Button from "../../components/ui/Button";
+import Upload from "../../components/Upload";
+import {useNavigate} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,6 +13,14 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleUploadComplete = (base64Image: string) => {
+    const newId = Date.now().toString();
+    navigate(`/visualiser/${newId}`);
+    return true;
+  };
+
   return (
     <div className="home">
       <Navbar/>
@@ -30,7 +40,7 @@ export default function Home() {
           <a href="#upload" className="cta">Start Building <ArrowRight className="icon"/> </a>
           <Button variant="outline" size="lg" className="demo">Watch Demo</Button>
         </div>
-        <div id="id" className="upload-shell">
+        <div id="upload" className="upload-shell">
           <div className="grid-overlay"/>
           <div className="upload-card">
             <div className="upload-head">
@@ -40,7 +50,7 @@ export default function Home() {
               <h3>Upload your floor plan</h3>
               <p>Supports JPG, PNG, formats up to 10MB</p>
             </div>
-            <p>Upload Images</p>
+            <Upload onComplete={handleUploadComplete}/>
           </div>
         </div>
       </section>
