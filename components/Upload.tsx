@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useOutletContext} from "react-router";
 import {CheckCircle2, ImageIcon, UploadIcon} from "lucide-react";
 import {PROGRESS_INTERVAL_MS, PROGRESS_STEP, REDIRECT_DELAY_MS} from "../lib/constants";
@@ -9,21 +9,71 @@ const Upload = ({onComplete}: UploadProps) => {
   const [progress, setProgress] = useState(0);
   const {isSignedIn} = useOutletContext<AuthContext>();
 
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const readerRef = useRef<FileReader | null>(null);
+
+  const cleanup = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (readerRef.current) {
+      readerRef.current.abort();
+      readerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return cleanup;
+  }, [cleanup]);
+
   const processFile = useCallback((file: File) => {
     if (!isSignedIn) return;
+
+    // 50MB limit
+    if (file.size > 50 * 1024 * 1024) {
+      alert("File size exceeds 50MB limit");
+      return;
+    }
+
+    cleanup();
     setFile(file);
     setProgress(0);
 
     const reader = new FileReader();
+    readerRef.current = reader;
+
+    reader.onerror = () => {
+      if (readerRef.current !== reader) return;
+      cleanup();
+      alert("Error reading file");
+    };
+
     reader.onloadend = () => {
+      if (readerRef.current !== reader) return;
+      if (reader.error || !reader.result) {
+        cleanup();
+        alert("Error reading file");
+        return;
+      }
+
       const base64String = reader.result as string;
 
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            timeoutRef.current = setTimeout(() => {
               onComplete(base64String);
+              timeoutRef.current = null;
             }, REDIRECT_DELAY_MS);
             return 100;
           }
@@ -32,7 +82,7 @@ const Upload = ({onComplete}: UploadProps) => {
       }, PROGRESS_INTERVAL_MS);
     };
     reader.readAsDataURL(file);
-  }, [isSignedIn, onComplete]);
+  }, [isSignedIn, onComplete, cleanup]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
