@@ -422,7 +422,7 @@
       }
 
       h1 {
-        @apply text-6xl md:text-8xl font-serif leading-[0.95] text-black mb-8 max-w-5xl mx-auto;
+        @apply text-5xl md:text-7xl font-serif leading-[0.95] text-black mb-8 max-w-5xl mx-auto;
       }
 
       .subtitle {
