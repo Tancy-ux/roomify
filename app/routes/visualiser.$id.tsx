@@ -1,14 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {useLocation, useNavigate} from "react-router";
 import {generate3DView} from "../../lib/ai.action";
-import {run} from "node:test";
 import {Box, Download, RefreshCcw, Share2, X} from "lucide-react";
 import Button from "../../components/ui/Button";
 
 const VisualiserId = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const {initialImage, initialRender, name} = location.state || {};
+  const {initialImage, initialRendered: initialRender, name} = location.state || {};
 
   const hasInitialGenerated = useRef(false);
 
@@ -27,6 +26,7 @@ const VisualiserId = () => {
       }
     } catch (e) {
       console.error(`Failed to run generation: ${e}`);
+    } finally {
       setIsProcessing(false);
     }
   }
@@ -57,7 +57,7 @@ const VisualiserId = () => {
           <div className="panel-header">
             <div className="panel-meta">
               <p>Project</p>
-              <h2>{'Untitled Project'}</h2>
+              <h2>{name ?? 'Untitled Project'}</h2>
               <p className="note">Created by You</p>
             </div>
             <div className="panel-actions">
