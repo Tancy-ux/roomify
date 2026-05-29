@@ -29,7 +29,7 @@ export default function Home() {
       alert("Failed to save project");
       return false;
     }
-    setProjects((prev) => [newItem, ...prev]);
+    setProjects((prev) => [saved, ...prev]);
     navigate(`/visualiser/${newId}`, {
       state: {
         initialImage: saved.sourceImage,
@@ -84,7 +84,7 @@ export default function Home() {
           </div>
           <div className="projects-grid">
             {projects.map(({id, name, renderedImage, sourceImage, timestamp}) => (
-              <div className="project-card group">
+              <div key={id} className="project-card group">
                 <div className="preview">
                   <img src={renderedImage || sourceImage}
                        alt="project"/>

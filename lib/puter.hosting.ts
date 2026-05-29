@@ -20,7 +20,9 @@ export const getOrCreateHostingConfig = async (): Promise<HostingConfig | null> 
 
   try {
     const created = await puter.hosting.create(subdomain, '.');
-    return {subdomain: created.subdomain}
+    const config = {subdomain: created.subdomain};
+    await puter.kv.set(HOSTING_CONFIG_KEY, config);
+    return config;
   } catch (e) {
     console.error(`Failed to create hosting config: ${e}`);
     return null;
@@ -37,10 +39,8 @@ export const uploadImageToHosting = async ({
   if (!hosting || !url) return null;
   if (isHostedUrl(url)) return {url};
   try {
-    const resolved = label === "rendered" ? await imageUrlToPngBlob(url).then((blob) => blob ? {
-      blob,
-      contentType: 'image/png'
-    } : null) : await fetchBlobFromUrl(url);
+    const renderedPng = label === "rendered" ? await imageUrlToPngBlob(url) : null;
+    const resolved = renderedPng ? {blob: renderedPng, contentType: "image/png"} : await fetchBlobFromUrl(url);
     if (!resolved) return null;
 
     const contentType = resolved.contentType || resolved.blob.type || '';
