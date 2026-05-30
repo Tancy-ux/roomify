@@ -24,6 +24,16 @@ Install the dependencies:
 npm install
 ```
 
+### Environment Setup
+
+Create a `.env.local` file by copying the template:
+
+```bash
+cp .env.example .env.local
+```
+
+Make sure to provision your own `VITE_PUTER_WORKER_URL` in `.env.local` or your CI environment.
+
 ### Development
 
 Start the development server with HMR:
@@ -80,7 +90,8 @@ Make sure to deploy the output of `npm run build`
 
 ## Styling
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting
+experience. You can use whatever CSS framework you prefer.
 
 ---
 
