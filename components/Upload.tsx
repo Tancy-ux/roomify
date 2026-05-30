@@ -32,6 +32,10 @@ const Upload = ({onComplete}: UploadProps) => {
     return cleanup;
   }, [cleanup]);
 
+  const validateFile = useCallback((file: File) => {
+    return file.type.startsWith('image/');
+  }, []);
+
   const processFile = useCallback((file: File) => {
     if (!isSignedIn) return;
 
@@ -101,7 +105,7 @@ const Upload = ({onComplete}: UploadProps) => {
     if (!isSignedIn) return;
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type.startsWith('image/')) {
+    if (droppedFile && validateFile(droppedFile)) {
       processFile(droppedFile);
     }
   };
@@ -109,7 +113,7 @@ const Upload = ({onComplete}: UploadProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isSignedIn) return;
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
+    if (selectedFile && validateFile(selectedFile)) {
       processFile(selectedFile);
     }
   };

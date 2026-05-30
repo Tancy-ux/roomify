@@ -22,15 +22,27 @@ const VisualiserId = () => {
 
   const handleBack = () => navigate('/')
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!currentImage) return;
 
-    const link = document.createElement("a");
-    link.href = currentImage;
-    link.download = `roomify-render-${id || 'export'}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const response = await fetch(currentImage);
+      if (!response.ok) throw new Error("Failed to fetch image");
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `roomify-render-${id || 'export'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Failed to export image:", error);
+      alert("Failed to export image. Please try again.");
+    }
   };
 
   const runGeneration = async (item: DesignItem) => {
@@ -127,7 +139,6 @@ const VisualiserId = () => {
     );
   }
 
-  // @ts-ignore
   return (
     <div className="visualizer">
       <nav className="topbar">
@@ -193,7 +204,7 @@ const VisualiserId = () => {
               <ReactCompareSlider defaultValue={50} style={{width: '100%', height: 'auto'}} itemOne={
                 <ReactCompareSliderImage src={project?.sourceImage} alt="before" className="compare-img"/>
               } itemTwo={
-                <ReactCompareSliderImage src={currentImage || project?.renderedImage} alt="after"
+                <ReactCompareSliderImage src={currentImage} alt="after"
                                          className="compare-img"/>
               }/>
             ) : (
