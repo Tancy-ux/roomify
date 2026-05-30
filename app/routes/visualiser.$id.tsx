@@ -4,6 +4,7 @@ import {generate3DView} from "../../lib/ai.action";
 import {Box, Download, RefreshCcw, Share2, X} from "lucide-react";
 import Button from "../../components/ui/Button";
 import {createProject, getProjectById} from "../../lib/puter.action";
+import {ReactCompareSlider, ReactCompareSliderImage} from "react-compare-slider";
 
 const VisualiserId = () => {
   const {id} = useParams();
@@ -20,6 +21,17 @@ const VisualiserId = () => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
 
   const handleBack = () => navigate('/')
+
+  const handleExport = () => {
+    if (!currentImage) return;
+
+    const link = document.createElement("a");
+    link.href = currentImage;
+    link.download = `roomify-render-${id || 'export'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const runGeneration = async (item: DesignItem) => {
     if (!id || !item.sourceImage) return;
@@ -115,6 +127,7 @@ const VisualiserId = () => {
     );
   }
 
+  // @ts-ignore
   return (
     <div className="visualizer">
       <nav className="topbar">
@@ -136,8 +149,7 @@ const VisualiserId = () => {
               <p className="note">Created by You</p>
             </div>
             <div className="panel-actions">
-              <Button size="sm" className="export" disabled={!currentImage} onClick={() => {
-              }}>
+              <Button size="sm" className="export" disabled={!currentImage} onClick={handleExport}>
                 <Download className="size-4 mr-2"/> Export
               </Button>
               <Button size="sm" className="share" onClick={() => {
@@ -162,6 +174,32 @@ const VisualiserId = () => {
                       <span className="subtitle">Generating your 3D visualisation</span>
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="panel compare">
+          <div className="panel-header">
+            <div className="panel-meta">
+              <p>Comparisons</p>
+              <h3>Before and After</h3>
+            </div>
+            <div className="hint">Drag to compare</div>
+          </div>
+          <div className="compare-stage">
+            {project?.sourceImage && currentImage ? (
+              <ReactCompareSlider defaultValue={50} style={{width: '100%', height: 'auto'}} itemOne={
+                <ReactCompareSliderImage src={project?.sourceImage} alt="before" className="compare-img"/>
+              } itemTwo={
+                <ReactCompareSliderImage src={currentImage || project?.renderedImage} alt="after"
+                                         className="compare-img"/>
+              }/>
+            ) : (
+              <div className="compare-fallback">
+                {project?.sourceImage && (
+                  <img src={project.sourceImage} alt="before" className="compare-img"/>
                 )}
               </div>
             )}
