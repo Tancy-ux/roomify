@@ -14,6 +14,7 @@ const VisualiserId = () => {
 
   const [project, setProject] = useState<DesignItem | null>(null);
   const [isProjectLoading, setIsProjectLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -65,6 +66,12 @@ const VisualiserId = () => {
 
       if (!isMounted) return;
 
+      if (!fetchedProject) {
+        setLoadError("Project not found or failed to load.");
+        setIsProjectLoading(false);
+        return;
+      }
+
       setProject(fetchedProject);
       setCurrentImage(fetchedProject?.renderedImage || null);
       setIsProjectLoading(false);
@@ -96,6 +103,17 @@ const VisualiserId = () => {
     void runGeneration(project);
   }, [project, isProjectLoading]);
 
+
+  if (loadError) {
+    return (
+      <div className="visualizer flex flex-col items-center justify-center min-h-screen p-4">
+        <h2 className="text-xl font-semibold mb-4">{loadError}</h2>
+        <Button onClick={handleBack}>
+          Back
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="visualizer">
